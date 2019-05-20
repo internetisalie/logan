@@ -19,3 +19,16 @@ func LogContextFromContext(ctx context.Context) (LogContext, bool) {
 	logCtx, ok := ctx.Value(logContextKey).(LogContext)
 	return logCtx, ok
 }
+
+func ExtendContext(ctx context.Context, logCtx LogContext) context.Context {
+	newCtx := make(LogContext)
+	if oldCtx, ok := LogContextFromContext(ctx); ok {
+		for k, v := range oldCtx {
+			newCtx[k] = v
+		}
+	}
+	for k, v := range logCtx {
+		newCtx[k] = v
+	}
+	return NewContextWithLogContext(ctx, newCtx)
+}
