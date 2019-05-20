@@ -13,7 +13,7 @@ type Logger struct {
 
 const FieldName = "logger"
 
-func (logger *Logger) Fields() logrus.Fields {
+func (logger *Logger) Fields() LogContext {
 	// Return all fields except `name`
 	result := make(logrus.Fields)
 	for k, v := range logger.fields {
@@ -22,7 +22,7 @@ func (logger *Logger) Fields() logrus.Fields {
 		}
 	}
 
-	return result
+	return LogContext(result)
 }
 
 func (logger *Logger) newEntry() *logrus.Entry {
@@ -37,6 +37,10 @@ func (logger *Logger) WithFields(fields logrus.Fields) *logrus.Entry {
 	return logger.newEntry().WithFields(fields)
 }
 
+func (logger *Logger) WithLogContext(logCtx LogContext) *logrus.Entry {
+	return logger.newEntry().WithFields(logrus.Fields(logCtx))
+}
+
 // Add an error as single field to the log entry.  All it does is call
 // `WithError` for the given `error`.
 func (logger *Logger) WithError(err error) *logrus.Entry {
@@ -45,7 +49,11 @@ func (logger *Logger) WithError(err error) *logrus.Entry {
 
 // Add a context to the log entry.
 func (logger *Logger) WithContext(ctx context.Context) *logrus.Entry {
-	return logger.newEntry().WithContext(ctx)
+	entry := logger.newEntry().WithContext(ctx)
+	if logContext, ok := LogContextFromContext(ctx); ok {
+		entry = entry.WithFields(logrus.Fields(logContext))
+	}
+	return entry
 }
 
 // Overrides the time of the log entry.
@@ -54,10 +62,10 @@ func (logger *Logger) WithTime(t time.Time) *logrus.Entry {
 }
 
 func (logger *Logger) WithExtendedField(key string, value interface{}) *Logger {
-	return newLogger(logger, logrus.Fields{key: value})
+	return newLogger(logger, LogContext{key: value})
 }
 
-func (logger *Logger) WithExtendedFields(fields ...logrus.Fields) *Logger {
+func (logger *Logger) WithExtendedLogContext(fields ...LogContext) *Logger {
 	if len(fields) == 0 {
 		return logger
 	}
@@ -187,7 +195,7 @@ func (logger *Logger) Panicln(args ...interface{}) {
 	logger.newEntry().Panicln(args...)
 }
 
-func newLogger(logger ParentLogger, fields ...logrus.Fields) *Logger {
+func newLogger(logger ParentLogger, fields ...LogContext) *Logger {
 	allFields := make(logrus.Fields)
 	for _, field := range fields {
 		for k, v := range field {
@@ -201,7 +209,7 @@ func newLogger(logger ParentLogger, fields ...logrus.Fields) *Logger {
 	}
 }
 
-func NewLogger(name string, fields ...logrus.Fields) *Logger {
-	fields = append([]logrus.Fields{{FieldName: name}}, fields...)
+func NewLogger(name string, fields ...LogContext) *Logger {
+	fields = append([]LogContext{{FieldName: name}}, fields...)
 	return newLogger(logrus.StandardLogger(), fields...)
 }
