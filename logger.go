@@ -8,35 +8,53 @@ import (
 
 type Logger struct {
 	ParentLogger
-	Fields logrus.Fields
+	fields logrus.Fields
+}
+
+const FieldName = "logger"
+
+func (logger *Logger) Fields() logrus.Fields {
+	// Return all fields except `name`
+	result := make(logrus.Fields)
+	for k, v := range logger.fields {
+		if k != FieldName {
+			result[k] = v
+		}
+	}
+
+	return result
+}
+
+func (logger *Logger) newEntry() *logrus.Entry {
+	return logger.ParentLogger.WithFields(logger.fields)
 }
 
 func (logger *Logger) WithField(key string, value interface{}) *logrus.Entry {
-	return logger.ParentLogger.WithFields(logger.Fields).WithField(key, value)
+	return logger.newEntry().WithField(key, value)
 }
 
 func (logger *Logger) WithFields(fields logrus.Fields) *logrus.Entry {
-	return logger.ParentLogger.WithFields(logger.Fields).WithFields(fields)
+	return logger.newEntry().WithFields(fields)
 }
 
 // Add an error as single field to the log entry.  All it does is call
 // `WithError` for the given `error`.
 func (logger *Logger) WithError(err error) *logrus.Entry {
-	return logger.ParentLogger.WithFields(logger.Fields).WithError(err)
+	return logger.newEntry().WithError(err)
 }
 
 // Add a context to the log entry.
 func (logger *Logger) WithContext(ctx context.Context) *logrus.Entry {
-	return logger.ParentLogger.WithFields(logger.Fields).WithContext(ctx)
+	return logger.newEntry().WithContext(ctx)
 }
 
 // Overrides the time of the log entry.
 func (logger *Logger) WithTime(t time.Time) *logrus.Entry {
-	return logger.ParentLogger.WithFields(logger.Fields).WithTime(t)
+	return logger.newEntry().WithTime(t)
 }
 
 func (logger *Logger) WithExtendedField(key string, value interface{}) *Logger {
-	return newLogger(logger, logrus.Fields{key:value})
+	return newLogger(logger, logrus.Fields{key: value})
 }
 
 func (logger *Logger) WithExtendedFields(fields ...logrus.Fields) *Logger {
@@ -49,124 +67,124 @@ func (logger *Logger) WithExtendedFields(fields ...logrus.Fields) *Logger {
 
 func (logger *Logger) Logf(level logrus.Level, format string, args ...interface{}) {
 	if logger.ParentLogger.IsLevelEnabled(level) {
-		logger.ParentLogger.WithFields(logger.Fields).Logf(level, format, args...)
+		logger.newEntry().Logf(level, format, args...)
 	}
 }
 
 func (logger *Logger) Tracef(format string, args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Tracef(format, args...)
+	logger.newEntry().Tracef(format, args...)
 }
 
 func (logger *Logger) Debugf(format string, args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Debugf(format, args...)
+	logger.newEntry().Debugf(format, args...)
 }
 
 func (logger *Logger) Infof(format string, args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Infof(format, args...)
+	logger.newEntry().Infof(format, args...)
 }
 
 func (logger *Logger) Printf(format string, args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Printf(format, args...)
+	logger.newEntry().Printf(format, args...)
 }
 
 func (logger *Logger) Warnf(format string, args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Warnf(format, args...)
+	logger.newEntry().Warnf(format, args...)
 }
 
 func (logger *Logger) Warningf(format string, args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Warningf(format, args...)
+	logger.newEntry().Warningf(format, args...)
 }
 
 func (logger *Logger) Errorf(format string, args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Errorf(format, args...)
+	logger.newEntry().Errorf(format, args...)
 }
 
 func (logger *Logger) Fatalf(format string, args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Fatalf(format, args...)
+	logger.newEntry().Fatalf(format, args...)
 }
 
 func (logger *Logger) Panicf(format string, args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Panicf(format, args...)
+	logger.newEntry().Panicf(format, args...)
 }
 
 func (logger *Logger) Log(level logrus.Level, args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Log(level, args...)
+	logger.newEntry().Log(level, args...)
 }
 
 func (logger *Logger) Trace(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Trace(args...)
+	logger.newEntry().Trace(args...)
 }
 
 func (logger *Logger) Debug(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Debug(args...)
+	logger.newEntry().Debug(args...)
 }
 
 func (logger *Logger) Info(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Info(args...)
+	logger.newEntry().Info(args...)
 }
 
 func (logger *Logger) Print(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Print(args...)
+	logger.newEntry().Print(args...)
 }
 
 func (logger *Logger) Warn(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Warn(args...)
+	logger.newEntry().Warn(args...)
 }
 
 func (logger *Logger) Warning(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Warning(args...)
+	logger.newEntry().Warning(args...)
 }
 
 func (logger *Logger) Error(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Error(args...)
+	logger.newEntry().Error(args...)
 }
 
 func (logger *Logger) Fatal(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Fatal(args...)
+	logger.newEntry().Fatal(args...)
 }
 
 func (logger *Logger) Panic(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Panic(args...)
+	logger.newEntry().Panic(args...)
 }
 
 func (logger *Logger) Logln(level logrus.Level, args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Logln(level, args...)
+	logger.newEntry().Logln(level, args...)
 }
 
 func (logger *Logger) Traceln(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Traceln(args...)
+	logger.newEntry().Traceln(args...)
 }
 
 func (logger *Logger) Debugln(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Debugln(args...)
+	logger.newEntry().Debugln(args...)
 }
 
 func (logger *Logger) Infoln(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Infoln(args...)
+	logger.newEntry().Infoln(args...)
 }
 
 func (logger *Logger) Println(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Println(args...)
+	logger.newEntry().Println(args...)
 }
 
 func (logger *Logger) Warnln(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Warnln(args...)
+	logger.newEntry().Warnln(args...)
 }
 
 func (logger *Logger) Warningln(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Warningln(args...)
+	logger.newEntry().Warningln(args...)
 }
 
 func (logger *Logger) Errorln(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Errorln(args...)
+	logger.newEntry().Errorln(args...)
 }
 
 func (logger *Logger) Fatalln(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Fatalln(args...)
+	logger.newEntry().Fatalln(args...)
 }
 
 func (logger *Logger) Panicln(args ...interface{}) {
-	logger.ParentLogger.WithFields(logger.Fields).Panicln(args...)
+	logger.newEntry().Panicln(args...)
 }
 
 func newLogger(logger ParentLogger, fields ...logrus.Fields) *Logger {
@@ -179,11 +197,11 @@ func newLogger(logger ParentLogger, fields ...logrus.Fields) *Logger {
 
 	return &Logger{
 		ParentLogger: logger,
-		Fields:       allFields,
+		fields:       allFields,
 	}
 }
 
 func NewLogger(name string, fields ...logrus.Fields) *Logger {
-	fields = append([]logrus.Fields{{"name": name}}, fields...)
+	fields = append([]logrus.Fields{{FieldName: name}}, fields...)
 	return newLogger(logrus.StandardLogger(), fields...)
 }
