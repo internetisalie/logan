@@ -1,7 +1,6 @@
 package logan
 
 import (
-	logstash "github.com/bshuster-repo/logrus-logstash-hook"
 	"github.com/sirupsen/logrus"
 	"os"
 	"time"
@@ -43,19 +42,6 @@ func SetFormat(format string) {
 			FullTimestamp:   true,
 			TimestampFormat: time.RFC3339Nano,
 		})
-	}
-}
-
-func SetLogstashServer(server, appName string) {
-	if server != "" {
-		hook, err := logstash.NewHook("tcp", server, appName)
-		if err != nil {
-			logrus.StandardLogger().Error(err)
-			return
-		}
-		hook.TimeFormat = time.RFC3339Nano
-		logrus.AddHook(hook)
-
 	}
 }
 
