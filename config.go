@@ -34,14 +34,14 @@ func SetFormat(format string) {
 	switch format {
 	case "json":
 		logrus.SetFormatter(&logrus.JSONFormatter{
-			PrettyPrint: true,
-			TimestampFormat:time.RFC3339Nano,
+			PrettyPrint:     true,
+			TimestampFormat: time.RFC3339Nano,
 		})
 
 	default:
 		logrus.SetFormatter(&logrus.TextFormatter{
-			FullTimestamp:true,
-			TimestampFormat:time.RFC3339Nano,
+			FullTimestamp:   true,
+			TimestampFormat: time.RFC3339Nano,
 		})
 	}
 }
@@ -57,4 +57,13 @@ func SetLogstashServer(server, appName string) {
 		logrus.AddHook(hook)
 
 	}
+}
+
+func SetHttpServer(endpoint string) *HttpJsonHook {
+	if endpoint != "" {
+		hook := NewHttpJsonHook(endpoint)
+		logrus.AddHook(hook)
+		return hook
+	}
+	return nil
 }
