@@ -1,4 +1,4 @@
-module gitlab.internetisalie.net/things/logan
+module code.internetisalie.net/logan
 
 go 1.12
 
